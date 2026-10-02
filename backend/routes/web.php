@@ -1,12 +1,15 @@
 <?php
 
-use App\Http\Controllers\Central\DashboardController;
+use App\Http\Controllers\Central\TenantController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::prefix('central')->name('central.')->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::prefix('central')->middleware(['central.auth'])->name('central.')->group(function () {
+    Route::resource('tenants', TenantController::class);
+    Route::post('tenants/{tenant}/suspend', [TenantController::class, 'suspend'])->name('tenants.suspend');
+    Route::post('tenants/{tenant}/reactivate', [TenantController::class, 'reactivate'])->name('tenants.reactivate');
+    Route::post('tenants/{tenant}/impersonate', [TenantController::class, 'impersonate'])->name('tenants.impersonate');
 });

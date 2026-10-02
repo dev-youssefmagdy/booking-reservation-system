@@ -34,4 +34,10 @@ class Plan extends Model
     {
         return $this->hasMany(Subscription::class);
     }
+
+    /** @return HasMany<PlanFeature, $this> */
+    public function planFeatures(): HasMany
+    {
+        return $this->hasMany(PlanFeature::class);
+    }
 }
