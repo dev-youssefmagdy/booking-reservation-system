@@ -39,6 +39,21 @@ class Customer extends Model
         return $this->hasMany(Booking::class);
     }
 
+    public function customerNotes(): HasMany
+    {
+        return $this->hasMany(CustomerNote::class);
+    }
+
+    public function loyaltyTransactions(): HasMany
+    {
+        return $this->hasMany(LoyaltyTransaction::class);
+    }
+
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
     public function isBlacklisted(): bool
     {
         return $this->is_blacklisted;

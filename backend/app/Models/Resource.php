@@ -53,6 +53,32 @@ class Resource extends Model
         return $this->hasMany(BlackoutDate::class);
     }
 
+    public function media(): HasMany
+    {
+        return $this->hasMany(ResourceMedia::class)->orderBy('sort_order');
+    }
+
+    public function availability(): HasMany
+    {
+        return $this->hasMany(ResourceAvailability::class);
+    }
+
+    public function pricingRules(): HasMany
+    {
+        return $this->hasMany(PricingRule::class)->orderByDesc('priority');
+    }
+
+    public function addOns(): HasMany
+    {
+        return $this->hasMany(AddOn::class);
+    }
+
+    public function getCoverImageAttribute(): ?string
+    {
+        return $this->media()->where('is_cover', true)->value('file_path')
+            ?? $this->media()->first()?->file_path;
+    }
+
     public function getFormattedPriceAttribute(): string
     {
         return '$'.number_format((float) $this->base_price, 2).' / '.str_replace('per_', '', $this->price_unit);

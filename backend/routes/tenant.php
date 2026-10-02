@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Tenant\Auth\LoginController;
 use App\Http\Controllers\Tenant\Auth\PasswordResetController;
+use App\Http\Controllers\Tenant\BookingController;
 use App\Http\Controllers\Tenant\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
@@ -37,7 +38,13 @@ Route::middleware([
         Route::get('/profile', fn () => 'Profile')->name('tenant.profile');
 
         // Bookings
-        Route::get('/bookings', fn () => 'Bookings')->name('tenant.bookings.index');
+        Route::resource('bookings', BookingController::class)->names('tenant.bookings');
+        Route::post('bookings/{booking}/confirm', [BookingController::class, 'confirm'])->name('tenant.bookings.confirm');
+        Route::post('bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('tenant.bookings.cancel');
+        Route::post('bookings/{booking}/checkin', [BookingController::class, 'checkin'])->name('tenant.bookings.checkin');
+        Route::post('bookings/{booking}/checkout', [BookingController::class, 'checkout'])->name('tenant.bookings.checkout');
+        Route::post('bookings/{booking}/noshow', [BookingController::class, 'noshow'])->name('tenant.bookings.noshow');
+        Route::get('bookings-pending', [BookingController::class, 'pending'])->name('tenant.bookings.pending');
 
         // Resources
         Route::get('/resources', fn () => 'Resources')->name('tenant.resources.index');

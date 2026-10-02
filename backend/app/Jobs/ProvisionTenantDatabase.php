@@ -25,6 +25,8 @@ class ProvisionTenantDatabase implements ShouldQueue
                 '--path' => 'database/migrations/tenant',
                 '--force' => true,
             ]);
+
+            Artisan::call('tenant:seed-roles');
         });
     }
 }
