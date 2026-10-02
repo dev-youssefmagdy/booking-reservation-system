@@ -5,7 +5,13 @@ declare(strict_types=1);
 use App\Http\Controllers\Tenant\Auth\LoginController;
 use App\Http\Controllers\Tenant\Auth\PasswordResetController;
 use App\Http\Controllers\Tenant\BookingController;
+use App\Http\Controllers\Tenant\Customer\LeadController;
+use App\Http\Controllers\Tenant\CustomerController;
 use App\Http\Controllers\Tenant\DashboardController;
+use App\Http\Controllers\Tenant\Staff\AttendanceController;
+use App\Http\Controllers\Tenant\Staff\LeaveController;
+use App\Http\Controllers\Tenant\Staff\ScheduleController;
+use App\Http\Controllers\Tenant\StaffController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -49,11 +55,33 @@ Route::middleware([
         // Resources
         Route::get('/resources', fn () => 'Resources')->name('tenant.resources.index');
 
-        // Customers
-        Route::get('/customers', fn () => 'Customers')->name('tenant.customers.index');
+        // Customers CRM
+        Route::resource('customers', CustomerController::class)->names('tenant.customers');
+        Route::post('customers/{customer}/blacklist', [CustomerController::class, 'blacklist'])->name('tenant.customers.blacklist');
+        Route::post('customers/{customer}/remove-blacklist', [CustomerController::class, 'removeBlacklist'])->name('tenant.customers.remove-blacklist');
+        Route::post('customers/{customer}/notes', [CustomerController::class, 'addNote'])->name('tenant.customers.notes.store');
+        Route::get('customers-blacklisted', [CustomerController::class, 'blacklistView'])->name('tenant.customers.blacklist.view');
+
+        // Leads
+        Route::resource('leads', LeadController::class)->names('tenant.leads');
+        Route::post('leads/{lead}/convert', [LeadController::class, 'convert'])->name('tenant.leads.convert');
 
         // Staff
-        Route::get('/staff', fn () => 'Staff')->name('tenant.staff.index');
+        Route::resource('staff', StaffController::class)->names('tenant.staff');
+        Route::post('staff/{staff}/clock-in', [StaffController::class, 'clockIn'])->name('tenant.staff.clock-in');
+        Route::post('staff/{staff}/clock-out', [StaffController::class, 'clockOut'])->name('tenant.staff.clock-out');
+        Route::get('staff/{staff}/schedule', [ScheduleController::class, 'index'])->name('tenant.staff.schedule');
+        Route::post('staff/{staff}/schedule', [ScheduleController::class, 'update'])->name('tenant.staff.schedule.update');
+
+        // Leave Requests
+        Route::get('leave', [LeaveController::class, 'index'])->name('tenant.leave.index');
+        Route::post('leave', [LeaveController::class, 'store'])->name('tenant.leave.store');
+        Route::post('leave/{leave}/approve', [LeaveController::class, 'approve'])->name('tenant.leave.approve');
+        Route::post('leave/{leave}/reject', [LeaveController::class, 'reject'])->name('tenant.leave.reject');
+
+        // Attendance
+        Route::get('attendance', [AttendanceController::class, 'index'])->name('tenant.attendance.index');
+        Route::get('staff/{staff}/attendance-report', [AttendanceController::class, 'report'])->name('tenant.staff.attendance-report');
 
         // Finance
         Route::get('/finance', fn () => 'Finance')->name('tenant.finance.index');

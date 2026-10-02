@@ -83,6 +83,11 @@ class CustomerController extends Controller
         return back()->with('success', 'Customer has been removed from blacklist.');
     }
 
+    public function blacklistView(): View
+    {
+        return view('tenant.customers.blacklist');
+    }
+
     public function addNote(Customer $customer, Request $request): RedirectResponse
     {
         $request->validate([
