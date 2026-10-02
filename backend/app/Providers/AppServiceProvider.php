@@ -4,7 +4,10 @@ namespace App\Providers;
 
 use App\Events\BookingConfirmed;
 use App\Events\BookingCreated;
+use App\Events\PaymentReceived;
 use App\Listeners\GenerateInvoiceOnBooking;
+use App\Listeners\PostBookingRevenueJournal;
+use App\Listeners\PostPaymentJournal;
 use App\Listeners\SendBookingConfirmationNotification;
 use App\Listeners\UpdateResourceAvailability;
 use Illuminate\Support\Facades\Event;
@@ -28,5 +31,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(BookingCreated::class, SendBookingConfirmationNotification::class);
         Event::listen(BookingCreated::class, UpdateResourceAvailability::class);
         Event::listen(BookingConfirmed::class, GenerateInvoiceOnBooking::class);
+        Event::listen(BookingConfirmed::class, PostBookingRevenueJournal::class);
+        Event::listen(PaymentReceived::class, PostPaymentJournal::class);
     }
 }

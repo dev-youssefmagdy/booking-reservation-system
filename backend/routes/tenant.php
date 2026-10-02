@@ -2,12 +2,19 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Tenant\Accounting\AccountController as AccountingAccountController;
+use App\Http\Controllers\Tenant\Accounting\JournalController;
+use App\Http\Controllers\Tenant\Accounting\ReportController as AccountingReportController;
 use App\Http\Controllers\Tenant\Auth\LoginController;
 use App\Http\Controllers\Tenant\Auth\PasswordResetController;
 use App\Http\Controllers\Tenant\BookingController;
 use App\Http\Controllers\Tenant\Customer\LeadController;
 use App\Http\Controllers\Tenant\CustomerController;
 use App\Http\Controllers\Tenant\DashboardController;
+use App\Http\Controllers\Tenant\HR\PayrollController;
+use App\Http\Controllers\Tenant\HR\PayslipController;
+use App\Http\Controllers\Tenant\HR\PerformanceController;
+use App\Http\Controllers\Tenant\HR\SalaryController;
 use App\Http\Controllers\Tenant\InvoiceController;
 use App\Http\Controllers\Tenant\RefundController;
 use App\Http\Controllers\Tenant\ReportController;
@@ -149,5 +156,46 @@ Route::middleware([
 
         // Settings
         Route::get('/settings', fn () => 'Settings')->name('tenant.settings.index');
+
+        // HR & Payroll
+        Route::prefix('hr')->name('tenant.hr.')->group(function (): void {
+            Route::resource('payroll', PayrollController::class)
+                ->only(['index', 'create', 'store', 'show'])
+                ->names('payroll');
+            Route::post('payroll/{run}/mark-paid', [PayrollController::class, 'markPaid'])
+                ->name('payroll.mark-paid');
+            Route::get('payslips/{payslip}', [PayslipController::class, 'show'])
+                ->name('payslips.show');
+            Route::get('payslips/{payslip}/download', [PayslipController::class, 'download'])
+                ->name('payslips.download');
+            Route::get('staff/{staff}/salary', [SalaryController::class, 'index'])
+                ->name('salary.index');
+            Route::get('staff/{staff}/salary/create', [SalaryController::class, 'create'])
+                ->name('salary.create');
+            Route::post('staff/{staff}/salary', [SalaryController::class, 'store'])
+                ->name('salary.store');
+            Route::get('salary/{structure}/edit', [SalaryController::class, 'edit'])
+                ->name('salary.edit');
+            Route::put('salary/{structure}', [SalaryController::class, 'update'])
+                ->name('salary.update');
+            Route::resource('performance', PerformanceController::class)
+                ->names('performance');
+            Route::post('performance/{review}/acknowledge', [PerformanceController::class, 'acknowledge'])
+                ->name('performance.acknowledge');
+        });
+
+        // Accounting & Finance
+        Route::prefix('accounting')->name('tenant.accounting.')->group(function (): void {
+            Route::resource('accounts', AccountingAccountController::class)->names('accounts');
+            Route::get('journal', [JournalController::class, 'index'])->name('journal.index');
+            Route::get('journal/create', [JournalController::class, 'create'])->name('journal.create');
+            Route::post('journal', [JournalController::class, 'store'])->name('journal.store');
+            Route::get('journal/{entry}', [JournalController::class, 'show'])->name('journal.show');
+            Route::post('journal/{entry}/void', [JournalController::class, 'void'])->name('journal.void');
+            Route::get('reports/trial-balance', [AccountingReportController::class, 'trialBalance'])->name('reports.trial-balance');
+            Route::get('reports/balance-sheet', [AccountingReportController::class, 'balanceSheet'])->name('reports.balance-sheet');
+            Route::get('reports/profit-loss', [AccountingReportController::class, 'profitLoss'])->name('reports.profit-loss');
+            Route::get('reports/cash-flow', [AccountingReportController::class, 'cashFlow'])->name('reports.cash-flow');
+        });
     });
 });

@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\AlertExpiringDocuments;
 use App\Console\Commands\DeliverScheduledReports;
 use App\Console\Commands\SendBookingReminders;
 use Illuminate\Foundation\Inspiring;
@@ -12,3 +13,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command(DeliverScheduledReports::class)->weekly();
 Schedule::command(SendBookingReminders::class)->daily();
+Schedule::command(AlertExpiringDocuments::class)->weekly();
