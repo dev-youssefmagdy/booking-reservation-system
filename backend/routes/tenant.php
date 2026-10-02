@@ -8,6 +8,10 @@ use App\Http\Controllers\Tenant\BookingController;
 use App\Http\Controllers\Tenant\Customer\LeadController;
 use App\Http\Controllers\Tenant\CustomerController;
 use App\Http\Controllers\Tenant\DashboardController;
+use App\Http\Controllers\Tenant\Resource\AvailabilityController;
+use App\Http\Controllers\Tenant\Resource\MediaController;
+use App\Http\Controllers\Tenant\Resource\PricingController;
+use App\Http\Controllers\Tenant\ResourceController;
 use App\Http\Controllers\Tenant\Staff\AttendanceController;
 use App\Http\Controllers\Tenant\Staff\LeaveController;
 use App\Http\Controllers\Tenant\Staff\ScheduleController;
@@ -53,7 +57,21 @@ Route::middleware([
         Route::get('bookings-pending', [BookingController::class, 'pending'])->name('tenant.bookings.pending');
 
         // Resources
-        Route::get('/resources', fn () => 'Resources')->name('tenant.resources.index');
+        Route::resource('resources', ResourceController::class)->names('tenant.resources');
+        Route::prefix('resources/{resource}')->name('tenant.resources.')->group(function (): void {
+            Route::get('availability', [AvailabilityController::class, 'index'])->name('availability');
+            Route::post('availability', [AvailabilityController::class, 'update'])->name('availability.update');
+            Route::post('availability/block', [AvailabilityController::class, 'blockDates'])->name('availability.block');
+            Route::get('availability/calendar-data', [AvailabilityController::class, 'getCalendarData'])->name('availability.calendar-data');
+            Route::post('media', [MediaController::class, 'store'])->name('media.store');
+            Route::post('media/reorder', [MediaController::class, 'reorder'])->name('media.reorder');
+            Route::delete('media/{media}', [MediaController::class, 'destroy'])->name('media.destroy');
+            Route::post('media/{media}/cover', [MediaController::class, 'setCover'])->name('media.cover');
+            Route::get('pricing', [PricingController::class, 'index'])->name('pricing');
+            Route::post('pricing', [PricingController::class, 'store'])->name('pricing.store');
+            Route::put('pricing/{rule}', [PricingController::class, 'update'])->name('pricing.update');
+            Route::delete('pricing/{rule}', [PricingController::class, 'destroy'])->name('pricing.destroy');
+        });
 
         // Customers CRM
         Route::resource('customers', CustomerController::class)->names('tenant.customers');
