@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Tenant\Auth\LoginController;
 use App\Http\Controllers\Tenant\Auth\PasswordResetController;
+use App\Http\Controllers\Tenant\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -32,7 +33,7 @@ Route::middleware([
 
     // Tenant Admin — Protected routes
     Route::middleware('auth')->group(function (): void {
-        Route::get('/dashboard', fn () => 'Dashboard')->name('tenant.dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('tenant.dashboard');
         Route::get('/profile', fn () => 'Profile')->name('tenant.profile');
 
         // Bookings
