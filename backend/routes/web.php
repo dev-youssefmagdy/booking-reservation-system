@@ -1,19 +1,33 @@
 <?php
 
-use App\Http\Controllers\Central\PlanController;
-use App\Http\Controllers\Central\SubscriptionController;
-use App\Http\Controllers\Central\TenantController;
+declare(strict_types=1);
+
+use App\Http\Controllers\Central\Auth\LoginController;
+use App\Http\Middleware\Central\AuthMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::prefix('central')->middleware(['central.auth'])->name('central.')->group(function () {
-    Route::resource('tenants', TenantController::class);
-    Route::post('tenants/{tenant}/suspend', [TenantController::class, 'suspend'])->name('tenants.suspend');
-    Route::post('tenants/{tenant}/reactivate', [TenantController::class, 'reactivate'])->name('tenants.reactivate');
-    Route::post('tenants/{tenant}/impersonate', [TenantController::class, 'impersonate'])->name('tenants.impersonate');
-    Route::resource('plans', PlanController::class);
-    Route::resource('subscriptions', SubscriptionController::class);
+// Central Admin — Authentication (guest)
+Route::prefix('central')->name('central.')->group(function (): void {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+});
+
+// Central Admin — Protected routes
+Route::prefix('central')->name('central.')->middleware(AuthMiddleware::class)->group(function (): void {
+    Route::get('/dashboard', fn () => view('welcome'))->name('dashboard');
+    Route::get('/profile', fn () => view('welcome'))->name('profile');
+
+    // Tenants
+    Route::get('/tenants', fn () => view('welcome'))->name('tenants.index');
+
+    // Plans
+    Route::get('/plans', fn () => view('welcome'))->name('plans.index');
+
+    // Settings
+    Route::get('/settings', fn () => view('welcome'))->name('settings.index');
 });

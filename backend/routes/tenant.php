@@ -2,28 +2,58 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Tenant\Auth\LoginController;
+use App\Http\Controllers\Tenant\Auth\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
-
-/*
-|--------------------------------------------------------------------------
-| Tenant Routes
-|--------------------------------------------------------------------------
-|
-| Here you can register the tenant routes for your application.
-| These routes are loaded by the TenantRouteServiceProvider.
-|
-| Feel free to customize them however you want. Good luck!
-|
-*/
 
 Route::middleware([
     'web',
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
-])->group(function () {
+])->group(function (): void {
+
+    // Tenant public landing
     Route::get('/', function () {
         return 'This is your multi-tenant application. The id of the current tenant is '.tenant('id');
+    });
+
+    // Tenant Auth — Guest
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('tenant.login');
+    Route::post('/login', [LoginController::class, 'login'])->name('tenant.login.post');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('tenant.logout');
+
+    // Password Reset
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])->name('tenant.password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('tenant.password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('tenant.password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('tenant.password.update');
+
+    // Tenant Admin — Protected routes
+    Route::middleware('auth')->group(function (): void {
+        Route::get('/dashboard', fn () => 'Dashboard')->name('tenant.dashboard');
+        Route::get('/profile', fn () => 'Profile')->name('tenant.profile');
+
+        // Bookings
+        Route::get('/bookings', fn () => 'Bookings')->name('tenant.bookings.index');
+
+        // Resources
+        Route::get('/resources', fn () => 'Resources')->name('tenant.resources.index');
+
+        // Customers
+        Route::get('/customers', fn () => 'Customers')->name('tenant.customers.index');
+
+        // Staff
+        Route::get('/staff', fn () => 'Staff')->name('tenant.staff.index');
+
+        // Finance
+        Route::get('/finance', fn () => 'Finance')->name('tenant.finance.index');
+
+        // Reports
+        Route::get('/reports', fn () => 'Reports')->name('tenant.reports.index');
+
+        // Settings
+        Route::get('/settings', fn () => 'Settings')->name('tenant.settings.index');
     });
 });
