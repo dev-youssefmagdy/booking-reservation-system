@@ -5,20 +5,30 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\BookingConfirmed;
+use App\Services\Tenant\Finance\InvoiceService;
 use Illuminate\Support\Facades\Log;
 
 class GenerateInvoiceOnBooking
 {
-    /**
-     * Handle the event.
-     * Invoice logic will be built in AGENT-10.
-     */
+    public function __construct(
+        private readonly InvoiceService $invoiceService,
+    ) {}
+
     public function handle(BookingConfirmed $event): void
     {
-        Log::info('Invoice generation stub', [
-            'booking_id' => $event->booking->id,
-            'reference' => $event->booking->reference_number,
-            'total_amount' => $event->booking->total_amount,
-        ]);
+        try {
+            $invoice = $this->invoiceService->generateForBooking($event->booking);
+
+            Log::info('Invoice generated for booking', [
+                'booking_id' => $event->booking->id,
+                'reference' => $event->booking->reference_number,
+                'invoice_number' => $invoice->invoice_number,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to generate invoice for booking', [
+                'booking_id' => $event->booking->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

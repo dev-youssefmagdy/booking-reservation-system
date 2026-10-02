@@ -8,6 +8,9 @@ use App\Http\Controllers\Tenant\BookingController;
 use App\Http\Controllers\Tenant\Customer\LeadController;
 use App\Http\Controllers\Tenant\CustomerController;
 use App\Http\Controllers\Tenant\DashboardController;
+use App\Http\Controllers\Tenant\InvoiceController;
+use App\Http\Controllers\Tenant\RefundController;
+use App\Http\Controllers\Tenant\ReportController;
 use App\Http\Controllers\Tenant\Resource\AvailabilityController;
 use App\Http\Controllers\Tenant\Resource\MediaController;
 use App\Http\Controllers\Tenant\Resource\PricingController;
@@ -16,6 +19,7 @@ use App\Http\Controllers\Tenant\Staff\AttendanceController;
 use App\Http\Controllers\Tenant\Staff\LeaveController;
 use App\Http\Controllers\Tenant\Staff\ScheduleController;
 use App\Http\Controllers\Tenant\StaffController;
+use App\Http\Controllers\Tenant\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -101,11 +105,47 @@ Route::middleware([
         Route::get('attendance', [AttendanceController::class, 'index'])->name('tenant.attendance.index');
         Route::get('staff/{staff}/attendance-report', [AttendanceController::class, 'report'])->name('tenant.staff.attendance-report');
 
-        // Finance
-        Route::get('/finance', fn () => 'Finance')->name('tenant.finance.index');
+        // Finance — Transactions
+        Route::resource('transactions', TransactionController::class)
+            ->only(['index', 'show'])
+            ->names('tenant.transactions');
+
+        // Finance — Invoices
+        Route::resource('invoices', InvoiceController::class)
+            ->only(['index', 'show'])
+            ->names('tenant.invoices');
+        Route::post('invoices/{invoice}/send', [InvoiceController::class, 'send'])->name('tenant.invoices.send');
+        Route::get('invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('tenant.invoices.download');
+        Route::post('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('tenant.invoices.mark-paid');
+
+        // Finance — Refunds
+        Route::resource('refunds', RefundController::class)
+            ->only(['index', 'store'])
+            ->names('tenant.refunds');
 
         // Reports
         Route::get('/reports', fn () => 'Reports')->name('tenant.reports.index');
+        Route::prefix('reports')->name('tenant.reports.')->group(function (): void {
+            Route::get('bookings', [ReportController::class, 'bookings'])->name('bookings');
+            Route::get('revenue', [ReportController::class, 'revenue'])->name('revenue');
+            Route::get('occupancy', [ReportController::class, 'occupancy'])->name('occupancy');
+            Route::get('customers', [ReportController::class, 'customers'])->name('customers');
+            Route::get('cancellations', [ReportController::class, 'cancellations'])->name('cancellations');
+            Route::get('sources', [ReportController::class, 'sources'])->name('sources');
+            Route::get('export', [ReportController::class, 'export'])->name('export');
+        });
+
+        // Notifications
+        Route::prefix('notifications')->name('tenant.notifications.')->group(function (): void {
+            Route::get('templates', [NotificationController::class, 'templates'])->name('templates');
+            Route::get('templates/create', [NotificationController::class, 'createTemplate'])->name('templates.create');
+            Route::post('templates', [NotificationController::class, 'storeTemplate'])->name('templates.store');
+            Route::get('templates/{template}/edit', [NotificationController::class, 'editTemplate'])->name('templates.edit');
+            Route::put('templates/{template}', [NotificationController::class, 'updateTemplate'])->name('templates.update');
+            Route::get('logs', [NotificationController::class, 'logs'])->name('logs');
+            Route::post('test-send', [NotificationController::class, 'testSend'])->name('test-send');
+            Route::get('settings', [NotificationController::class, 'settings'])->name('settings');
+        });
 
         // Settings
         Route::get('/settings', fn () => 'Settings')->name('tenant.settings.index');
