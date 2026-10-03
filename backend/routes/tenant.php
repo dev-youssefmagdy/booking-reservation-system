@@ -16,6 +16,7 @@ use App\Http\Controllers\Tenant\HR\PayrollController;
 use App\Http\Controllers\Tenant\HR\PayslipController;
 use App\Http\Controllers\Tenant\HR\PerformanceController;
 use App\Http\Controllers\Tenant\HR\SalaryController;
+use App\Http\Controllers\Tenant\Integration\WebhookController;
 use App\Http\Controllers\Tenant\InvoiceController;
 use App\Http\Controllers\Tenant\Operations\ChecklistController;
 use App\Http\Controllers\Tenant\Operations\MaintenanceController;
@@ -28,6 +29,11 @@ use App\Http\Controllers\Tenant\Resource\AvailabilityController;
 use App\Http\Controllers\Tenant\Resource\MediaController;
 use App\Http\Controllers\Tenant\Resource\PricingController;
 use App\Http\Controllers\Tenant\ResourceController;
+use App\Http\Controllers\Tenant\ReviewController;
+use App\Http\Controllers\Tenant\Settings\BookingSettingsController;
+use App\Http\Controllers\Tenant\Settings\BrandingController;
+use App\Http\Controllers\Tenant\Settings\GeneralSettingsController;
+use App\Http\Controllers\Tenant\Settings\PaymentSettingsController;
 use App\Http\Controllers\Tenant\Staff\AttendanceController;
 use App\Http\Controllers\Tenant\Staff\LeaveController;
 use App\Http\Controllers\Tenant\Staff\ScheduleController;
@@ -206,6 +212,34 @@ Route::middleware([
             Route::post('purchase-requests', [PurchaseRequestController::class, 'store'])->name('purchase-requests.store');
             Route::post('purchase-requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase-requests.approve');
             Route::post('purchase-requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase-requests.reject');
+        });
+
+        // Reviews
+        Route::prefix('reviews')->name('tenant.reviews.')->group(function (): void {
+            Route::get('/', [ReviewController::class, 'index'])->name('index');
+            Route::get('{review}', [ReviewController::class, 'show'])->name('show');
+            Route::post('{review}/approve', [ReviewController::class, 'approve'])->name('approve');
+            Route::post('{review}/reject', [ReviewController::class, 'reject'])->name('reject');
+            Route::post('{review}/reply', [ReviewController::class, 'reply'])->name('reply');
+            Route::post('{review}/flag', [ReviewController::class, 'flag'])->name('flag');
+        });
+
+        // Settings
+        Route::prefix('settings')->name('tenant.settings.')->group(function (): void {
+            Route::get('/', fn () => redirect()->route('tenant.settings.general'))->name('index');
+            Route::get('general', [GeneralSettingsController::class, 'index'])->name('general');
+            Route::post('general', [GeneralSettingsController::class, 'update'])->name('general.update');
+            Route::get('booking', [BookingSettingsController::class, 'index'])->name('booking');
+            Route::post('booking', [BookingSettingsController::class, 'update'])->name('booking.update');
+            Route::get('branding', [BrandingController::class, 'index'])->name('branding');
+            Route::post('branding', [BrandingController::class, 'update'])->name('branding.update');
+            Route::get('payment', [PaymentSettingsController::class, 'index'])->name('payment');
+            Route::post('payment', [PaymentSettingsController::class, 'update'])->name('payment.update');
+        });
+
+        // Integrations
+        Route::prefix('integrations')->name('tenant.integrations.')->group(function (): void {
+            Route::resource('webhooks', WebhookController::class)->names('webhooks');
         });
 
         // Documents

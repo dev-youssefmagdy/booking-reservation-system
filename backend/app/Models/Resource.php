@@ -79,8 +79,18 @@ class Resource extends Model
             ?? $this->media()->first()?->file_path;
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function getFormattedPriceAttribute(): string
     {
         return '$'.number_format((float) $this->base_price, 2).' / '.str_replace('per_', '', $this->price_unit);
+    }
+
+    public function getRatingAverageAttribute(): float
+    {
+        return (float) $this->reviews()->published()->avg('rating') ?? 0.0;
     }
 }
