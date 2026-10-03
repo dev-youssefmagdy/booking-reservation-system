@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Central\Auth\LoginController;
 use App\Http\Controllers\Central\DashboardController;
 use App\Http\Controllers\Central\PlanController;
+use App\Http\Controllers\Central\ProfileController;
 use App\Http\Controllers\Central\Settings\GlobalSettingsController;
 use App\Http\Controllers\Central\SubscriptionController;
 use App\Http\Controllers\Central\TenantController;
@@ -49,6 +50,10 @@ Route::prefix('central')->name('central.')->middleware(AuthMiddleware::class)->g
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // Tenants — resource + custom member actions
     Route::resource('tenants', TenantController::class);
