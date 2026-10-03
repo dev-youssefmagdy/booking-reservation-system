@@ -1,75 +1,48 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Central;
 
-use App\Enums\PlanFeature;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Central\StorePlanRequest;
-use App\Models\Plan;
-use App\Services\Central\PlanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PlanController extends Controller
 {
-    public function __construct(private readonly PlanService $planService) {}
-
-    public function index(Request $request): mixed
+    public function index(): View
     {
-        if ($request->ajax()) {
-            $plans = Plan::withCount('subscriptions')->get();
-
-            return response()->json(['data' => $plans]);
-        }
-
-        $plans = Plan::withCount('subscriptions')->get();
-
-        return view('central.plans.index', compact('plans'));
+        return view('central.plans.index');
     }
 
     public function create(): View
     {
-        $features = PlanFeature::cases();
-
-        return view('central.plans.create', compact('features'));
+        return view('central.plans.create');
     }
 
-    public function store(StorePlanRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $this->planService->create($request->validated());
-
-        return redirect()->route('central.plans.index')
-            ->with('success', 'Plan created successfully.');
+        return redirect()->route('central.plans.index');
     }
 
-    public function show(Plan $plan): View
+    public function show(string $plan): View
     {
-        $plan->loadCount('subscriptions');
-
         return view('central.plans.show', compact('plan'));
     }
 
-    public function edit(Plan $plan): View
+    public function edit(string $plan): View
     {
-        $features = PlanFeature::cases();
-
-        return view('central.plans.edit', compact('plan', 'features'));
+        return view('central.plans.edit', compact('plan'));
     }
 
-    public function update(StorePlanRequest $request, Plan $plan): RedirectResponse
+    public function update(Request $request, string $plan): RedirectResponse
     {
-        $this->planService->update($plan, $request->validated());
-
-        return redirect()->route('central.plans.index')
-            ->with('success', 'Plan updated successfully.');
+        return redirect()->route('central.plans.index');
     }
 
-    public function destroy(Plan $plan): RedirectResponse
+    public function destroy(string $plan): RedirectResponse
     {
-        $plan->delete();
-
-        return redirect()->route('central.plans.index')
-            ->with('success', 'Plan deleted successfully.');
+        return redirect()->route('central.plans.index');
     }
 }

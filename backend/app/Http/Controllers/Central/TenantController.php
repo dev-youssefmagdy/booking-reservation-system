@@ -4,111 +4,60 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Central;
 
-use App\DataTables\Central\TenantDataTable;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Central\StoreTenantRequest;
-use App\Http\Requests\Central\UpdateTenantRequest;
-use App\Models\Plan;
-use App\Models\Tenant;
-use App\Services\Central\TenantManagementService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class TenantController extends Controller
 {
-    public function __construct(
-        private readonly TenantManagementService $tenantService
-    ) {}
-
-    public function index(TenantDataTable $dataTable): mixed
+    public function index(): View
     {
-        if (request()->ajax()) {
-            return $dataTable->ajax();
-        }
-
-        return $dataTable->render('central.tenants.index');
+        return view('central.tenants.index');
     }
 
     public function create(): View
     {
-        $plans = Plan::where('is_active', true)->get();
-
-        return view('central.tenants.create', compact('plans'));
+        return view('central.tenants.create');
     }
 
-    public function store(StoreTenantRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $tenant = $this->tenantService->create($request->validated());
-
-        return redirect()->route('central.tenants.show', $tenant)
-            ->with('success', "Tenant \"{$tenant->name}\" created successfully.");
+        return redirect()->route('central.tenants.index');
     }
 
-    public function show(Tenant $tenant): View
+    public function show(string $tenant): View
     {
-        $tenant->load('subscription.plan');
-
-        $stats = [
-            'bookings_count' => 0,
-        ];
-
-        return view('central.tenants.show', compact('tenant', 'stats'));
+        return view('central.tenants.show', compact('tenant'));
     }
 
-    public function edit(Tenant $tenant): View
+    public function edit(string $tenant): View
     {
-        $plans = Plan::where('is_active', true)->get();
-        $tenant->load('subscription');
-
-        return view('central.tenants.edit', compact('tenant', 'plans'));
+        return view('central.tenants.edit', compact('tenant'));
     }
 
-    public function update(UpdateTenantRequest $request, Tenant $tenant): RedirectResponse
+    public function update(Request $request, string $tenant): RedirectResponse
     {
-        $data = $request->validated();
-
-        $tenant->update([
-            'name' => $data['name'],
-            'contact_name' => $data['contact_name'],
-            'contact_email' => $data['contact_email'],
-            'phone' => $data['phone'] ?? null,
-            'business_type' => $data['business_type'],
-            'logo' => $data['logo'] ?? null,
-            'notes' => $data['notes'] ?? null,
-        ]);
-
-        if (isset($data['plan_id']) && $tenant->subscription) {
-            $tenant->subscription->update(['plan_id' => $data['plan_id']]);
-        }
-
-        return redirect()->route('central.tenants.show', $tenant)
-            ->with('success', "Tenant \"{$tenant->name}\" updated successfully.");
+        return redirect()->route('central.tenants.index');
     }
 
-    public function destroy(Tenant $tenant): RedirectResponse
+    public function destroy(string $tenant): RedirectResponse
     {
-        $this->tenantService->delete($tenant);
-
-        return redirect()->route('central.tenants.index')
-            ->with('success', "Tenant \"{$tenant->name}\" deleted successfully.");
+        return redirect()->route('central.tenants.index');
     }
 
-    public function suspend(Tenant $tenant): RedirectResponse
+    public function suspend(string $tenant): RedirectResponse
     {
-        $this->tenantService->suspend($tenant);
-
-        return back()->with('success', "Tenant \"{$tenant->name}\" has been suspended.");
+        return redirect()->route('central.tenants.index');
     }
 
-    public function reactivate(Tenant $tenant): RedirectResponse
+    public function reactivate(string $tenant): RedirectResponse
     {
-        $this->tenantService->reactivate($tenant);
-
-        return back()->with('success', "Tenant \"{$tenant->name}\" has been reactivated.");
+        return redirect()->route('central.tenants.index');
     }
 
-    public function impersonate(Tenant $tenant): RedirectResponse
+    public function impersonate(string $tenant): RedirectResponse
     {
-        return $this->tenantService->impersonate($tenant);
+        return redirect()->route('central.tenants.index');
     }
 }
