@@ -54,6 +54,8 @@ class BookingCreationService
             foreach ($data['items'] ?? [] as $item) {
                 BookingItem::create([
                     'booking_id' => $booking->id,
+                    'item_type' => $item['item_type'] ?? 'custom',
+                    'item_id' => $item['item_id'] ?? null,
                     'description' => $item['description'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
