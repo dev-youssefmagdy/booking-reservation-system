@@ -3,18 +3,27 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Central\Auth\LoginController;
+use App\Http\Controllers\Central\BlogAdminController;
+use App\Http\Controllers\Central\ContactAdminController;
 use App\Http\Controllers\Central\DashboardController;
+use App\Http\Controllers\Central\FaqAdminController;
 use App\Http\Controllers\Central\PlanController;
 use App\Http\Controllers\Central\ProfileController;
 use App\Http\Controllers\Central\Settings\GlobalSettingsController;
 use App\Http\Controllers\Central\SubscriptionController;
 use App\Http\Controllers\Central\TenantController;
+use App\Http\Controllers\Central\Website\BlogController;
 use App\Http\Controllers\Central\Website\CategoryController;
+use App\Http\Controllers\Central\Website\ContactController;
+use App\Http\Controllers\Central\Website\FaqController;
 use App\Http\Controllers\Central\Website\HomeController;
 use App\Http\Controllers\Central\Website\ListingController;
 use App\Http\Controllers\Central\Website\PageController;
+use App\Http\Controllers\Central\Website\PricingController;
 use App\Http\Controllers\Central\Website\RegisterController;
 use App\Http\Controllers\Central\Website\SearchController;
+use App\Http\Controllers\Central\Website\SitemapController;
+use App\Http\Controllers\Central\WebsiteSettingsController;
 use App\Http\Middleware\Central\AuthMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +37,20 @@ Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('centr
 Route::get('/listing/{slug}', [ListingController::class, 'show'])->name('central.website.listing');
 Route::get('/register', [RegisterController::class, 'index'])->name('central.website.register');
 Route::post('/register', [RegisterController::class, 'store'])->name('central.website.register.store');
+Route::get('/check-subdomain', [RegisterController::class, 'checkSubdomain'])->name('central.website.check-subdomain');
+
+Route::get('/pricing', [PricingController::class, 'index'])->name('central.website.pricing');
+Route::get('/blog', [BlogController::class, 'index'])->name('central.website.blog');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('central.website.blog.show');
+Route::get('/faq', [FaqController::class, 'index'])->name('central.website.faq');
+Route::get('/contact', [ContactController::class, 'index'])->name('central.website.contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('central.website.contact.store');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('central.website.sitemap');
+Route::get('/robots.txt', function () {
+    $content = "User-agent: *\nAllow: /\nDisallow: /central/\nSitemap: ".url('/sitemap.xml');
+
+    return response($content, 200, ['Content-Type' => 'text/plain']);
+})->name('central.website.robots');
 
 // Must be last among public routes to avoid swallowing other named paths.
 Route::get('/{slug}', [PageController::class, 'show'])->name('central.website.page');
@@ -68,6 +91,26 @@ Route::prefix('central')->name('central.')->middleware(AuthMiddleware::class)->g
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::put('/subscriptions/{subscription}', [SubscriptionController::class, 'update'])->name('subscriptions.update');
 
+    // FAQ Admin
+    Route::resource('faq', FaqAdminController::class);
+
+    // Blog Admin
+    Route::resource('blog', BlogAdminController::class)->names([
+        'index' => 'blog.index',
+        'create' => 'blog.create',
+        'store' => 'blog.store',
+        'show' => 'blog.show',
+        'edit' => 'blog.edit',
+        'update' => 'blog.update',
+        'destroy' => 'blog.destroy',
+    ]);
+
+    // Contact Messages
+    Route::get('contacts', [ContactAdminController::class, 'index'])->name('contact.index');
+    Route::get('contacts/{contactMessage}', [ContactAdminController::class, 'show'])->name('contact.show');
+    Route::post('contacts/{contactMessage}/replied', [ContactAdminController::class, 'markReplied'])->name('contact.mark-replied');
+    Route::delete('contacts/{contactMessage}', [ContactAdminController::class, 'destroy'])->name('contact.destroy');
+
     // Settings
     Route::prefix('settings')->name('settings.')->group(function (): void {
         Route::get('/', [GlobalSettingsController::class, 'index'])->name('index');
@@ -80,5 +123,8 @@ Route::prefix('central')->name('central.')->middleware(AuthMiddleware::class)->g
         Route::post('/maintenance/toggle', [GlobalSettingsController::class, 'toggleMaintenance'])->name('maintenance.toggle');
 
         Route::get('/audit-log', [GlobalSettingsController::class, 'auditLog'])->name('audit-log');
+
+        Route::get('/website', [WebsiteSettingsController::class, 'index'])->name('website');
+        Route::put('/website', [WebsiteSettingsController::class, 'update'])->name('website.update');
     });
 });

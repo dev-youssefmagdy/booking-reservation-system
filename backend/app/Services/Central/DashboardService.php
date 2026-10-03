@@ -3,6 +3,9 @@
 namespace App\Services\Central;
 
 use App\Enums\TenantStatus;
+use App\Models\BlogPost;
+use App\Models\ContactMessage;
+use App\Models\Faq;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Tenant;
@@ -24,6 +27,10 @@ class DashboardService
 
         $totalPlans = Plan::where('is_active', true)->count();
 
+        $blogPostsCount = class_exists(BlogPost::class) ? BlogPost::published()->count() : 0;
+        $unreadContacts = class_exists(ContactMessage::class) ? ContactMessage::unread()->count() : 0;
+        $faqsCount = class_exists(Faq::class) ? Faq::active()->count() : 0;
+
         return [
             'total_tenants' => $totalTenants,
             'active_tenants' => $activeTenants,
@@ -31,6 +38,9 @@ class DashboardService
             'trial_tenants' => $trialTenants,
             'mrr' => (float) $mrr,
             'total_plans' => $totalPlans,
+            'blog_posts_count' => $blogPostsCount,
+            'unread_contacts' => $unreadContacts,
+            'faqs_count' => $faqsCount,
         ];
     }
 

@@ -20,6 +20,11 @@ class Plan extends Model
         'max_staff',
         'features',
         'is_active',
+        'tagline',
+        'description',
+        'highlight_features',
+        'is_featured',
+        'sort_order',
     ];
 
     /** @var array<string, string> */
@@ -27,6 +32,8 @@ class Plan extends Model
         'features' => 'array',
         'is_active' => 'boolean',
         'price' => 'decimal:2',
+        'highlight_features' => 'array',
+        'is_featured' => 'boolean',
     ];
 
     /** @return HasMany<Subscription, $this> */

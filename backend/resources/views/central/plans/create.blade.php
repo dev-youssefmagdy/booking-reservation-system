@@ -66,14 +66,76 @@
                 </div>
             </div>
 
-            <div class="mt-4">
-                <label class="flex cursor-pointer items-center gap-2">
-                    <input type="hidden" name="is_active" value="0">
-                    <input type="checkbox" name="is_active" value="1"
-                           {{ old('is_active', true) ? 'checked' : '' }}
-                           class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm font-medium text-gray-700">Active</span>
-                </label>
+            <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="flex items-center gap-4">
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="hidden" name="is_active" value="0">
+                        <input type="checkbox" name="is_active" value="1"
+                               {{ old('is_active', true) ? 'checked' : '' }}
+                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-sm font-medium text-gray-700">Active</span>
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="hidden" name="is_featured" value="0">
+                        <input type="checkbox" name="is_featured" value="1"
+                               {{ old('is_featured') ? 'checked' : '' }}
+                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-sm font-medium text-gray-700">Featured</span>
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+                    <input type="number" name="sort_order" value="{{ old('sort_order', 0) }}" min="0"
+                           class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 class="mb-4 text-base font-semibold text-gray-900">Marketing Details</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tagline</label>
+                    <input type="text" name="tagline" value="{{ old('tagline') }}"
+                           placeholder="e.g. Best for growing businesses"
+                           class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea name="description" rows="3"
+                              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">{{ old('description') }}</textarea>
+                </div>
+                <div
+                    x-data="{
+                        items: {{ json_encode(old('highlight_features', [])) }},
+                        addItem() { this.items.push('') },
+                        removeItem(index) { this.items.splice(index, 1) }
+                    }"
+                >
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Highlight Features</label>
+                    <div class="space-y-2">
+                        <template x-for="(item, index) in items" :key="index">
+                            <div class="flex items-center gap-2">
+                                <input type="text" :name="'highlight_features[' + index + ']'" x-model="items[index]"
+                                       placeholder="e.g. Unlimited bookings"
+                                       class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                <button type="button" @click="removeItem(index)"
+                                        class="rounded-md border border-gray-200 p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 hover:border-red-200">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    <button type="button" @click="addItem()"
+                            class="mt-2 inline-flex items-center gap-1 rounded-md border border-dashed border-gray-300 px-3 py-1.5 text-sm text-gray-500 hover:border-indigo-400 hover:text-indigo-600">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Add Feature
+                    </button>
+                </div>
             </div>
         </div>
 

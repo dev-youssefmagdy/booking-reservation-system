@@ -26,6 +26,12 @@ class StorePlanRequest extends FormRequest
             'max_staff' => ['nullable', 'integer', 'min:0'],
             'features' => ['nullable', 'array'],
             'is_active' => ['boolean'],
+            'tagline' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'highlight_features' => ['nullable', 'array'],
+            'highlight_features.*' => ['nullable', 'string', 'max:255'],
+            'is_featured' => ['boolean'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }
