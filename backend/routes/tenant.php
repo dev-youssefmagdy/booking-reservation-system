@@ -11,11 +11,17 @@ use App\Http\Controllers\Tenant\BookingController;
 use App\Http\Controllers\Tenant\Customer\LeadController;
 use App\Http\Controllers\Tenant\CustomerController;
 use App\Http\Controllers\Tenant\DashboardController;
+use App\Http\Controllers\Tenant\DocumentController;
 use App\Http\Controllers\Tenant\HR\PayrollController;
 use App\Http\Controllers\Tenant\HR\PayslipController;
 use App\Http\Controllers\Tenant\HR\PerformanceController;
 use App\Http\Controllers\Tenant\HR\SalaryController;
 use App\Http\Controllers\Tenant\InvoiceController;
+use App\Http\Controllers\Tenant\Operations\ChecklistController;
+use App\Http\Controllers\Tenant\Operations\MaintenanceController;
+use App\Http\Controllers\Tenant\Procurement\PurchaseOrderController;
+use App\Http\Controllers\Tenant\Procurement\PurchaseRequestController;
+use App\Http\Controllers\Tenant\Procurement\SupplierController;
 use App\Http\Controllers\Tenant\RefundController;
 use App\Http\Controllers\Tenant\ReportController;
 use App\Http\Controllers\Tenant\Resource\AvailabilityController;
@@ -183,6 +189,30 @@ Route::middleware([
             Route::post('performance/{review}/acknowledge', [PerformanceController::class, 'acknowledge'])
                 ->name('performance.acknowledge');
         });
+
+        // Operations
+        Route::prefix('operations')->name('tenant.operations.')->group(function (): void {
+            Route::get('schedule', [ChecklistController::class, 'masterSchedule'])->name('schedule');
+            Route::resource('checklists', ChecklistController::class)->names('checklists');
+            Route::resource('maintenance', MaintenanceController::class)->names('maintenance');
+            Route::post('maintenance/{schedule}/complete', [MaintenanceController::class, 'markComplete'])->name('maintenance.complete');
+        });
+
+        // Procurement
+        Route::prefix('procurement')->name('tenant.procurement.')->group(function (): void {
+            Route::resource('suppliers', SupplierController::class)->names('suppliers');
+            Route::resource('purchase-orders', PurchaseOrderController::class)->names('purchase-orders');
+            Route::get('purchase-requests', [PurchaseRequestController::class, 'index'])->name('purchase-requests.index');
+            Route::post('purchase-requests', [PurchaseRequestController::class, 'store'])->name('purchase-requests.store');
+            Route::post('purchase-requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase-requests.approve');
+            Route::post('purchase-requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject'])->name('purchase-requests.reject');
+        });
+
+        // Documents
+        Route::resource('documents', DocumentController::class)
+            ->only(['index', 'store', 'show', 'destroy'])
+            ->names('tenant.documents');
+        Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('tenant.documents.download');
 
         // Accounting & Finance
         Route::prefix('accounting')->name('tenant.accounting.')->group(function (): void {
