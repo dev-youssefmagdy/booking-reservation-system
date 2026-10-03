@@ -33,7 +33,7 @@ class BookingApiTest extends ApiTestCase
         $customer = Customer::factory()->create(['password' => bcrypt('password')]);
         $resource = Resource::factory()->create([
             'status' => ResourceStatus::Active,
-            'booking_type' => BookingType::Accommodation,
+            'booking_type' => BookingType::Hotel,
         ]);
 
         $response = $this->actingAs($customer, 'sanctum')

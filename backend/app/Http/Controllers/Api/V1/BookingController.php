@@ -43,7 +43,7 @@ class BookingController extends Controller
             'check_in' => $request->check_in,
             'check_out' => $request->check_out,
             'guests_count' => $request->guests_count,
-            'source' => 'flutter_app',
+            'source' => 'api',
             'notes' => $request->notes,
             'items' => $request->items ?? [],
         ]);
