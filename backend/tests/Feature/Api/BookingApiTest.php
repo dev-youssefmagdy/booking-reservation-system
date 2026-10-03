@@ -10,14 +10,10 @@ use App\Enums\ResourceStatus;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Resource;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
 
-class BookingApiTest extends TestCase
+class BookingApiTest extends ApiTestCase
 {
-    use RefreshDatabase;
-
     #[Test]
     public function test_authenticated_customer_can_list_bookings(): void
     {

@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace Tests\Feature\Api;
 
 use App\Models\Customer;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
 
-class AuthApiTest extends TestCase
+class AuthApiTest extends ApiTestCase
 {
-    use RefreshDatabase;
-
     #[Test]
     public function test_customer_can_register(): void
     {

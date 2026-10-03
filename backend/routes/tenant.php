@@ -39,6 +39,12 @@ use App\Http\Controllers\Tenant\Staff\LeaveController;
 use App\Http\Controllers\Tenant\Staff\ScheduleController;
 use App\Http\Controllers\Tenant\StaffController;
 use App\Http\Controllers\Tenant\TransactionController;
+use App\Http\Controllers\Tenant\Website\Auth\CustomerAuthController;
+use App\Http\Controllers\Tenant\Website\BookingFlowController;
+use App\Http\Controllers\Tenant\Website\CustomerAccountController;
+use App\Http\Controllers\Tenant\Website\HomeController;
+use App\Http\Controllers\Tenant\Website\ListingController;
+use App\Http\Controllers\Tenant\Website\SearchController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -49,9 +55,37 @@ Route::middleware([
     PreventAccessFromCentralDomains::class,
 ])->group(function (): void {
 
-    // Tenant public landing
-    Route::get('/', function () {
-        return 'This is your multi-tenant application. The id of the current tenant is '.tenant('id');
+    // Public website
+    Route::get('/', [HomeController::class, 'index'])->name('tenant.home');
+    Route::get('/search', [SearchController::class, 'index'])->name('tenant.search');
+    Route::get('/listing/{resource:slug}', [ListingController::class, 'show'])->name('tenant.listing');
+    Route::get('/listing/{resource}/price-breakdown', [ListingController::class, 'getPriceBreakdown'])->name('tenant.listing.price');
+
+    // Customer auth
+    Route::get('/customer/login', [CustomerAuthController::class, 'showLoginForm'])->name('tenant.customer.login');
+    Route::post('/customer/login', [CustomerAuthController::class, 'login']);
+    Route::post('/customer/logout', [CustomerAuthController::class, 'logout'])->name('tenant.customer.logout');
+    Route::get('/customer/register', [CustomerAuthController::class, 'showRegisterForm'])->name('tenant.customer.register');
+    Route::post('/customer/register', [CustomerAuthController::class, 'register']);
+
+    // Booking flow (requires customer auth)
+    Route::middleware('auth:customer')->group(function (): void {
+        Route::get('/book/{resource}/step1', [BookingFlowController::class, 'step1'])->name('tenant.book.step1');
+        Route::post('/book/step2', [BookingFlowController::class, 'step2'])->name('tenant.book.step2');
+        Route::post('/book/step3', [BookingFlowController::class, 'step3'])->name('tenant.book.step3');
+        Route::post('/book/step4', [BookingFlowController::class, 'step4'])->name('tenant.book.step4');
+        Route::post('/book/step5', [BookingFlowController::class, 'step5'])->name('tenant.book.step5');
+        Route::post('/book/confirm', [BookingFlowController::class, 'confirmBooking'])->name('tenant.book.confirm');
+        Route::get('/book/confirmation/{booking}', [BookingFlowController::class, 'step6'])->name('tenant.book.step6');
+
+        // Customer account
+        Route::get('/account/bookings', [CustomerAccountController::class, 'myBookings'])->name('tenant.account.bookings');
+        Route::get('/account/bookings/{booking}', [CustomerAccountController::class, 'bookingDetail'])->name('tenant.account.booking-detail');
+        Route::post('/account/bookings/{booking}/cancel', [CustomerAccountController::class, 'cancelBooking'])->name('tenant.account.cancel-booking');
+        Route::get('/account/profile', [CustomerAccountController::class, 'profile'])->name('tenant.account.profile');
+        Route::post('/account/profile', [CustomerAccountController::class, 'updateProfile'])->name('tenant.account.profile.update');
+        Route::get('/account/wishlist', [CustomerAccountController::class, 'wishlist'])->name('tenant.account.wishlist');
+        Route::get('/account/reviews', [CustomerAccountController::class, 'myReviews'])->name('tenant.account.reviews');
     });
 
     // Tenant Auth — Guest
